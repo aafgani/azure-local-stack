@@ -1,0 +1,48 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sql_server_container
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Password@123"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  cosmosdb:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
+    container_name: cosmosdb
+    ports:
+      - "8081:8081"
+      - "10250-10255:10250-10255"
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 2
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
+    mem_limit: 3g
+    volumes:
+      - cosmos_data:/data
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    restart: unless-stopped
+
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+    volumes:
+      - azurite_data:/data
+
+volumes:
+  sqlserver_data:
+  cosmos_data:
+  azurite_data:
