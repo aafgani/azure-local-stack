@@ -1,18 +1,21 @@
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sql_server_container
+    user: root
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Password@123"
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      SA_PASSWORD: ${MSSQL_SA_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - ./data/sqlserver:/var/opt/mssql
+    networks:
+      - az-local-stack
 
   cosmosdb:
     image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
-    container_name: cosmosdb
+    container_name: cosmosdb-emulator
     ports:
       - "8081:8081"
       - "10250-10255:10250-10255"
@@ -21,7 +24,7 @@ services:
       AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
     mem_limit: 3g
     volumes:
-      - cosmos_data:/data
+      - ./data/cosmos:/data
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
@@ -33,16 +36,35 @@ services:
       --blobHost 0.0.0.0
       --queueHost 0.0.0.0
       --tableHost 0.0.0.0
+      --location /data
+      --skipApiVersionCheck
 
     ports:
       - "10000:10000"
       - "10001:10001"
       - "10002:10002"
 
+  asb:
+    container_name: "asb-emulator"
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    pull_policy: always
+    ports:
+      - "5672:5672"
+      - "5300:5300"
     volumes:
-      - azurite_data:/data
+      - "${CONFIG_PATH}:/service-bus/config.json"
+    environment:
+      SQL_SERVER: sqlserver
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      ACCEPT_EULA: ${ACCEPT_EULA}
+    depends_on:
+      - sql-server
+    networks:
+      - az-local-stack
 
-volumes:
-  sqlserver_data:
-  cosmos_data:
-  azurite_data:
+  volumes:
+      - ./data/azurite:/data
+
+  networks:
+      az-local-stack:
+        driver: bridge

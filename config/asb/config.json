@@ -1,0 +1,54 @@
+{
+  "UserConfig": {
+    "Namespaces": [
+      {
+        "Name": "LocalDevNamespace",
+        "Queues": [
+          {
+            "Name": "order-processing-queue",
+            "Properties": {
+              "DeadLetteringOnMessageExpiration": true,
+              "DefaultMessageTimeToLive": "PT30M",
+              "LockDuration": "PT30S",
+              "MaxDeliveryCount": 5,
+              "RequiresSession": false
+            }
+          }
+        ],
+        "Topics": [
+          {
+            "Name": "shipping-updates-topic",
+            "Subscriptions": [
+              {
+                "Name": "email-notifier-sub",
+                "Rules": [
+                  {
+                    "Name": "priority-filter",
+                    "Properties": {
+                      "FilterType": "Sql",
+                      "SqlFilter": {
+                        "SqlExpression": "Priority = 'High'"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "Name": "sms-notifier-sub"
+              }
+            ]
+          },
+          {
+            "Name": "npcx-dev-reporting",
+             "Subscriptions": [
+                {
+                    "Name":"report-sub"
+                }
+             ]
+          }
+        ]
+      }
+    ],
+    "Logging": { "Type": "File" }
+  }
+}
