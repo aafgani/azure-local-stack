@@ -2,7 +2,7 @@
   "UserConfig": {
     "Namespaces": [
       {
-        "Name": "LocalDevNamespace",
+        "Name": "sbemulatorns",
         "Queues": [
           {
             "Name": "order-processing-queue",
@@ -40,11 +40,11 @@
           },
           {
             "Name": "npcx-dev-reporting",
-             "Subscriptions": [
-                {
-                    "Name":"report-sub"
-                }
-             ]
+            "Subscriptions": [
+              {
+                "Name": "report-sub"
+              }
+            ]
           }
         ]
       }
